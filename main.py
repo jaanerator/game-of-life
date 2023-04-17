@@ -31,41 +31,6 @@ TODO
 """
 
 
-class GetNextAlives:
-    def __init__(self, row_lim, col_lim):
-        self.counter = {}
-        self.row_lower, self.row_upper = row_lim
-        self.col_lower, self.col_upper = col_lim
-        return
-
-    def get(self, alives_list):
-        for alive in alives_list:
-            self.cast_vote(alive)
-
-        result = []
-        for neighbor_key, counts in self.counter.items():
-            neighbor = tuple([int(idx) for idx in neighbor_key.split('_')])
-            if counts == 3 or (neighbor in alives_list and counts == 2):
-                result.append(neighbor)
-        return result
-
-    def cast_vote(self, alive):
-        row_idx, col_idx = alive
-        row_search_min = max(row_idx - 1, self.row_lower)
-        row_search_max = min(row_idx + 2, self.row_upper)
-        col_search_min = max(col_idx - 1, self.col_lower)
-        col_search_max = min(col_idx + 2, self.col_upper)
-        for neighbor_row in range(row_search_min, row_search_max):
-            for neighbor_col in range(col_search_min, col_search_max):
-                if neighbor_row != row_idx or neighbor_col != col_idx:
-                    neighbor_key = '%d_%d' % (neighbor_row, neighbor_col)
-                    if neighbor_key in self.counter.keys():
-                        self.counter[neighbor_key] += 1
-                    else:
-                        self.counter[neighbor_key] = 1
-        return
-
-
 class Animator:
     def __init__(self, history_, nrow, ncol, fps, figure_size):
         self.history = history_
@@ -142,18 +107,72 @@ def make_grid(alives_list, nrow, ncol):
     return grid
 
 
+class GameOfLife:
+    def __init__(self, nrow, ncol):
+        self.nrow = nrow
+        self.ncol = ncol
+        self.alives = None
+        return
+    
+    def set_initial(self, alives=None, num_alives=None):
+        if alives is not None:
+            self.alives = alives
+        else:
+            sampled_rows = np.random.choice(self.nrow, num_alives)
+            sampled_cols = np.random.choice(self.ncol, num_alives)
+            self.alives = list(zip(sampled_rows, sampled_cols))
+        return
+    
+    def run(self):
+        return
+
+class GetNextAlives:
+    def __init__(self, row_lim, col_lim):
+        self.counter = {}
+        self.row_lower, self.row_upper = row_lim
+        self.col_lower, self.col_upper = col_lim
+        return
+
+    def get(self, alives_list):
+        for alive in alives_list:
+            self.cast_vote(alive)
+
+        result = []
+        for neighbor_key, counts in self.counter.items():
+            neighbor = tuple([int(idx) for idx in neighbor_key.split('_')])
+            if counts == 3 or (neighbor in alives_list and counts == 2):
+                result.append(neighbor)
+        return result
+
+    def cast_vote(self, alive):
+        row_idx, col_idx = alive
+        row_search_min = max(row_idx - 1, self.row_lower)
+        row_search_max = min(row_idx + 2, self.row_upper)
+        col_search_min = max(col_idx - 1, self.col_lower)
+        col_search_max = min(col_idx + 2, self.col_upper)
+        for neighbor_row in range(row_search_min, row_search_max):
+            for neighbor_col in range(col_search_min, col_search_max):
+                if neighbor_row != row_idx or neighbor_col != col_idx:
+                    neighbor_key = '%d_%d' % (neighbor_row, neighbor_col)
+                    if neighbor_key in self.counter.keys():
+                        self.counter[neighbor_key] += 1
+                    else:
+                        self.counter[neighbor_key] = 1
+        return
+
+
 if __name__ == '__main__':
+    # Do not run this code
+    exit()
+
     # pre-defined settings
-    NROW = 30
-    NCOL = 30
     MAX_ITER = 1000
-    RANDOM_POINTS_NUM = int(NROW * NCOL * 0.3)
     SHUTDOWN_WAIT = 20
     FIGURE_SIZE = (6, 6)
     FPS = 30
     SAVE_MODE = True
-    SAVE_DIR = 'outputs'
-    LOG_DIR = 'logs'
+    SAVE_DIR = 'output'
+    LOG_DIR = 'log'
     DELETE_OLD_LOGS = False
 
     # set logger
@@ -164,9 +183,6 @@ if __name__ == '__main__':
     logger.info('START')
 
     # initial dataset
-    sampled_rows = np.random.choice(NROW, RANDOM_POINTS_NUM)
-    sampled_cols = np.random.choice(NCOL, RANDOM_POINTS_NUM)
-    alives = list(zip(sampled_rows, sampled_cols))
     logger.info('Sampling was successfully finished.')
 
     # main algorithm
