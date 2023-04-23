@@ -1,10 +1,13 @@
-import os
-from datetime import datetime
+from collections import defaultdict
+
 import numpy as np
 from tqdm import trange
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-import logging
+
+# import os
+# from datetime import datetime
+# import matplotlib.pyplot as plt
+# from matplotlib.animation import FuncAnimation
+# import logging
 
 
 """
@@ -111,63 +114,61 @@ class GameOfLife:
     def __init__(self, nrow, ncol):
         self.nrow = nrow
         self.ncol = ncol
-        self.alives = None
+        self.history = []
+        self.potential = []
+        self._alives = None
         return
+    
+    def run(self, max_iteration, alives=None, num_alives=None, shutdown_wait=20):
+        self.set_initial(alives, num_alives)
+        self.history.append(self._alives[:])
+        self.potential.append(float('inf'))
+        shutdown_count = 0
+        for _ in trange(max_iteration, desc='Simulation - '):
+            self.step()
+            self.history.append(self._alives[:])
+            self.potential.append(1) # TODO
+
+            if self.potential[-1] == self.potential[-2]:
+                shutdown_count += 1
+                if shutdonw_count >= shutdown_wait:
+                    break
     
     def set_initial(self, alives=None, num_alives=None):
         if alives is not None:
-            self.alives = alives
+            self._alives = alives
         else:
             sampled_rows = np.random.choice(self.nrow, num_alives)
             sampled_cols = np.random.choice(self.ncol, num_alives)
-            self.alives = list(zip(sampled_rows, sampled_cols))
+            self._alives = list(zip(sampled_rows, sampled_cols))
+        return
+        
+    def step(self):
+        counter = defaultdict(int)
+        for alive in self._alives:
+            row_idx, col_idx = alive
+            row_search_min = max(row_idx - 1, 0)
+            row_search_max = min(row_idx + 2, self.nrow)
+            col_search_min = max(col_idx - 1, 0)
+            col_search_max = min(col_idx + 2, self.ncol)
+            for neighbor_row in range(row_search_min, row_search_max):
+                for neighbor_col in range(col_search_min, col_search_max):
+                    if neighbor_row != row_idx or neighbor_col != col_idx:
+                        counter[(neighbor_row, neighbor_col)] += 1
+        
+        next_alives = []
+        for neighbor, counts in counter.items():
+            if counts == 3 or (neighbor in self._alives and counts == 2):
+                next_alives.append(neighbor)
+        self._alives = next_alives
         return
     
-    def run(self):
-        return
-
-class GetNextAlives:
-    def __init__(self, row_lim, col_lim):
-        self.counter = {}
-        self.row_lower, self.row_upper = row_lim
-        self.col_lower, self.col_upper = col_lim
-        return
-
-    def get(self, alives_list):
-        for alive in alives_list:
-            self.cast_vote(alive)
-
-        result = []
-        for neighbor_key, counts in self.counter.items():
-            neighbor = tuple([int(idx) for idx in neighbor_key.split('_')])
-            if counts == 3 or (neighbor in alives_list and counts == 2):
-                result.append(neighbor)
-        return result
-
-    def cast_vote(self, alive):
-        row_idx, col_idx = alive
-        row_search_min = max(row_idx - 1, self.row_lower)
-        row_search_max = min(row_idx + 2, self.row_upper)
-        col_search_min = max(col_idx - 1, self.col_lower)
-        col_search_max = min(col_idx + 2, self.col_upper)
-        for neighbor_row in range(row_search_min, row_search_max):
-            for neighbor_col in range(col_search_min, col_search_max):
-                if neighbor_row != row_idx or neighbor_col != col_idx:
-                    neighbor_key = '%d_%d' % (neighbor_row, neighbor_col)
-                    if neighbor_key in self.counter.keys():
-                        self.counter[neighbor_key] += 1
-                    else:
-                        self.counter[neighbor_key] = 1
-        return
-
 
 if __name__ == '__main__':
     # Do not run this code
     exit()
 
     # pre-defined settings
-    MAX_ITER = 1000
-    SHUTDOWN_WAIT = 20
     FIGURE_SIZE = (6, 6)
     FPS = 30
     SAVE_MODE = True
@@ -184,30 +185,6 @@ if __name__ == '__main__':
 
     # initial dataset
     logger.info('Sampling was successfully finished.')
-
-    # main algorithm
-    history = [alives[:]]
-    before_grid = make_grid(alives, NROW, NCOL)
-    potential = [np.inf]
-    shutdown_count = 0
-    for _ in trange(MAX_ITER - 1, desc='Simulation - '):
-        # get next alives
-        alives = GetNextAlives((0, NROW), (0, NCOL)).get(alives)
-        history.append(alives[:])
-
-        # make potential statistic
-        now_grid = make_grid(alives, NROW, NCOL)
-        potential.append((now_grid != before_grid).sum())
-        before_grid = now_grid
-
-        # shutdown rule
-        if potential[-1] == potential[-2]:
-            shutdown_count += 1
-            if shutdown_count >= SHUTDOWN_WAIT:
-                logger.info('Simulation was terminated earlier than scheduled by the shutdown rule.')
-                break
-    if shutdown_count < SHUTDOWN_WAIT:
-        logger.info('Simulation was terminated as expected (FULL RUNNING)')
 
     # pop-up animation
     animator = Animator(history, NROW, NCOL, FPS, FIGURE_SIZE)
