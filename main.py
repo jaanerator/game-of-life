@@ -1,12 +1,13 @@
+import os
+from datetime import datetime
 from collections import defaultdict
 
 import numpy as np
 from tqdm import trange
+import matplotlib.pyplot as plt
 
-# import os
-# from datetime import datetime
-# import matplotlib.pyplot as plt
-# from matplotlib.animation import FuncAnimation
+from src.game_of_life import GameOfLife
+from src.animator import GolAnimator
 
 
 """
@@ -24,60 +25,52 @@ Conway's Game of Life
         https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
 
 TODO
-    - title 실시간 변경
+    - title 실시간 변경 (저장 파일에서는 잘 안됨.)
+    - shutdown 조건 추가 (스케일이 너무 크면 potential 자체가 커져서 셧다운이 잘 안 됨.)
     - MovieWriter ffmpeg unavailable; using Pillow instead.
-    - Process finished with exit code -1073741819 (0xC0000005)
-    - 간헐적 응답없음 현상
-    - 셧다운조건에 비율도 추가. 5%
     - potential plot 꾸미기
+    - axis-off
 """
 
 
 if __name__ == '__main__':
-    # pre-defined settings
-    NROW = 100
-    NCOL = 100
+    # Settings
+    NROW = 30
+    NCOL = 30
     MAX_ITERATION = 1000
     ALIVES = None
-    NUM_ALIVES = 1000
+    NUM_ALIVES = 100
     SHUTDOWN_WAIT = 20
+    FPS = 30
+    FIGURE_SIZE = (6, 6)
+    SAVE_MODE = True
+    SAVE_DIR = 'output'
 
-    # FIGURE_SIZE = (6, 6)
-    # FPS = 30
-    # SAVE_MODE = True
-    # SAVE_DIR = 'output'
-
+    # Run Algorithm
     gol = GameOfLife(NROW, NCOL)
     gol.run(MAX_ITERATION, alives=ALIVES, num_alives=NUM_ALIVES, shutdown_wait=SHUTDOWN_WAIT)
-    exit()
 
-    # pop-up animation
-    animator = Animator(history, NROW, NCOL, FPS, FIGURE_SIZE)
+    # Make Animation
+    animator = GolAnimator(gol.history, NROW, NCOL, FPS, FIGURE_SIZE)
     try:
         animator.show()
         print('Animation is closed safely.')
     except Exception as e:
         print(f'Animation is closed with unexpected error: {e}')
 
-    # save results
+    # Save Results
     if SAVE_MODE:
-        folder_dir = os.path.join(SAVE_DIR, get_folder_name(SAVE_DIR))
+        folder_dir = os.path.join(SAVE_DIR, datetime.now().strftime('%Y%m%d%H%M%S'))
         os.mkdir(folder_dir)
-
-        # history
-        history_file = open(os.path.join(folder_dir, 'history.txt'), 'w')
-        for alives in history:
-            history_file.write(str(alives) + '\n')
-        history_file.close()
-
-        # potential
-        plt.plot(potential)
-        plt.savefig(os.path.join(folder_dir, 'potential.png'))
-        plt.close()
 
         # animation
         animator.save(os.path.join(folder_dir, 'animation.gif'))
 
-        print('Process finished WITH SAVE successfully.')
+        # potential
+        plt.plot(gol.potential)
+        plt.savefig(os.path.join(folder_dir, 'potential.png'))
+        plt.close()
+
+        print('Process is finished WITH SAVING successfully.')
     else:
-        print('Process finished successfully.')
+        print('Process is finished successfully.')

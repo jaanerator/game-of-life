@@ -1,10 +1,11 @@
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
 
-class Animator:
-    def __init__(self, history_, nrow, ncol, fps, figure_size):
-        self.history = history_
+class GolAnimator:
+    def __init__(self, history, nrow, ncol, fps=24, figure_size=(7, 7)):
+        self.history = history
         self.nrow = nrow
         self.ncol = ncol
         self.interval = 1 / fps * 1000
