@@ -36,7 +36,7 @@ class GameOfLife:
     
     def _set_initial(self, alives=None, num_alives=None):
         if alives is not None:
-            self._alives = alives
+            self._alives = [(row, col) for (row, col) in alives if 0 <= row < self.nrow and 0 <= col < self.ncol]
         else:
             sampled_rows = np.random.choice(self.nrow, num_alives)
             sampled_cols = np.random.choice(self.ncol, num_alives)
