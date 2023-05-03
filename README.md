@@ -19,8 +19,8 @@ The *Game of Life* starts at two-dimensional GridWorld. Each cell is in one of t
 
 ## 2. Features
 
-1. **Provision of preset values** : This module provides pre-defined settings such as maximal number of iterations, coordinates of initial alives, fps for animation, etc. See [here] for detailed.
-2. **Automatic Stop Rule** : This module gets **potential** at each step to determine whether to end the simulation. See [here] for detailed.
+1. **Provision of preset values** : This module provides pre-defined settings such as maximal number of iterations, coordinates of initial alives, fps for animation, etc. See [here](#usage) for detailed.
+2. **Automatic Stop Rule** : This module gets **potential** at each step to determine whether to end the simulation. See [here](#stopping-rules) for detailed.
 3. **Animation** : This module shows animation in forms of gif.
 
 ## 3. Installation
@@ -31,39 +31,53 @@ cd game-of-life
 python install .
 ```
 
+<a name='usage'></a>
+
 ## 4. Usage
 
 Run a CLI-based execution code, main.py.
 
-<!--
 ```
-python main.py --p_straight=1.0 --p_wall=0.5 --n_range 2 4 --n_boxes=1 --annealing_steps=80000 --nb_steps=100000
+python main.py
 ```
 
 Belows are total arguments can be customized.
 
-#### Required
-
-* ```--p_straight=1.0``` : Samplers argument (Box's straight probability in random walk)
-
-#### Optional
-
-* ```--scope 5 5``` : Grid range near player to be used as input image
--->
+* ```--nrow=30``` : A height of gridworld
+* ```--ncol=30``` : A width of gridworld
+* ```--max_iteration=1000``` : Steps limitation to show
+* ```--alives 2,3 4,5``` : Coordinates of initial alives (default is None, which means they are randomly sampled). Space seperates each alives and comma(,) seperates coordinate x and y, respectively.
+* ```--num_alives=100``` : The number of initial alives to be sampled. This argument is valid only when ```--alives``` is None.
+* ```--shutdown_wait=20``` : The number of steps to wait stopping rule
+* ```--fps=30``` : Frame-per-second option for animation
+* ```--figure_size=6``` : Size of animation
+* ```--save_mode``` : If put this argument on, the program saves the results at ./output/* .
 
 ## 5. License
 
 Comply with MIT licenses and check the LICENSE file for details.
 
+## 6. Details
+
+<a name='stopping-rules'></a>
+
+### 6-1) Stopping Rule
+
+
+
+
+
+
+---
+
+<a name="footnote_1">1</a>: Source from Wikipedia, https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
+
 <!--
 TODO
+    - 용어정리
     - title 실시간 변경 (저장 파일에서는 잘 안됨.)
     - shutdown 조건 추가 (스케일이 너무 크면 potential 자체가 커져서 셧다운이 잘 안 됨.)
     - MovieWriter ffmpeg unavailable; using Pillow instead.
     - potential plot 꾸미기
     - axis-off
 -->
-
----
-
-<a name="footnote_1">1</a>: Source from Wikipedia, https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
