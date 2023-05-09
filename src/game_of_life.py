@@ -5,6 +5,25 @@ from tqdm import trange
 
 
 class GameOfLife:
+
+    """Game-Of-Life Algorithm
+
+    See https://github.com/jaanerator/game-of-life for
+    information on what game-of-life means and how it works
+
+    Parameters
+    ----------
+    nrow : int
+        A height of the gridworld
+    ncol : int
+        A width of the gridworld
+    
+    Attributes
+    ----------
+    run : None
+        Run the game-of-life algorithm
+    """
+
     def __init__(self, nrow, ncol):
         self.nrow = nrow
         self.ncol = ncol
@@ -14,6 +33,21 @@ class GameOfLife:
         return
     
     def run(self, max_iteration, alives=None, num_alives=None, shutdown_wait=20):
+
+        """Run the game-of-life algorithm
+
+        Parameters
+        ----------
+        max_iteration : int
+            Steps limitation to show
+        alives : list[tuple]
+            Coordinates of initial alives (default is None, which means they are randomly sampled).
+        num_alives : int
+            The number of initial alives to be sampled. This argument is valid only when alives is None.
+        shutdown_wait : int
+            The number of steps to wait stopping rule. Default is 20.
+        """
+
         self._set_initial(alives, num_alives)
         self.history.append(self._alives[:])
         self.potential.append(float('inf'))

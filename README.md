@@ -63,10 +63,7 @@ Comply with MIT licenses and check the LICENSE file for details.
 
 ### 6-1) Stopping Rule
 
-
-
-
-
+For each step, compare the previous step with the current step, and count the number of changes in the state of each cell from alive to dead, or vice versa. This count is defined as *potential*, and the algorithm forces the program to exit if the potential remains the same more than ```shutdown_wait``` times.
 
 ---
 
